@@ -628,8 +628,6 @@ const rentalCompanies: RentalCompany[] = [
           fees = pack
         }
       }
-      console.log(mileageFee)
-      console.log(fees)
 
       if (fees[0]![2] && fees[0]![1]) {
         // if extended
