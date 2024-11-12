@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -19,12 +18,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
@@ -819,7 +812,7 @@ const rentalCompanies: RentalCompany[] = [
             info: {
               feePerKm: 0,
               hourPack: {
-                name: pack[1],
+                name: pack[1] as string,
                 fee: packType,
               },
             },
@@ -1316,7 +1309,7 @@ export function RentACarComparison() {
               <DatePicker
                 id="startDate"
                 selected={startDate}
-                onChange={(date) => setStartDate(date)}
+                onChange={(date) => date && setStartDate(date)}
                 showTimeSelect
                 timeFormat="HH:mm"
                 timeIntervals={15}
@@ -1332,7 +1325,7 @@ export function RentACarComparison() {
               <DatePicker
                 id="endDate"
                 selected={endDate}
-                onChange={(date) => setEndDate(date)}
+                onChange={(date) => date && setEndDate(date)}
                 showTimeSelect
                 timeFormat="HH:mm"
                 timeIntervals={15}
