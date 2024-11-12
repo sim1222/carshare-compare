@@ -777,13 +777,15 @@ const rentalCompanies: RentalCompany[] = [
       const isDoubleNightOk =
         hours <= 12 &&
         (startDay.getHours() >= 18 || checkDateSmallerThanHour(startDay, 6)) &&
-        (endDay.getHours() >= 18 || checkDateSmallerThanHour(endDay, 6))
+        (endDay.getHours() >= 18 || checkDateSmallerThanHour(endDay, 6)) && 
+        !(startDay.getHours() == 6 && endDay.getHours() == 18)
           ? plans[TYPE].night.double
           : undefined;
       const isBusinessNightOk =
         hours <= 17 &&
         (startDay.getHours() >= 17 || checkDateSmallerThanHour(startDay, 10)) &&
-        (endDay.getHours() >= 17 || checkDateSmallerThanHour(endDay, 10))
+        (endDay.getHours() >= 17 || checkDateSmallerThanHour(endDay, 10)) && 
+        !(checkDateSmallerThanHour(startDay, 10) && endDay.getHours() >= 17)
           ? plans[TYPE].night.business
           : undefined;
 
