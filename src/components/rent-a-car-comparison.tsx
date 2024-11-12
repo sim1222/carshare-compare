@@ -1233,13 +1233,9 @@ const rentalCompanies: RentalCompany[] = [
         const exceededDays = Math.ceil(exceededHours / 24);
         const exceededHoursInLastDay = exceededHours % 24;
 
-        console.log("or", exceededHours, exceededDays, exceededHoursInLastDay);
-        console.log("or", exceededHoursInLastDay, exceededFeePerDay / exceededFeePerHour);
-
         if (exceededHoursInLastDay > exceededFeePerDay / exceededFeePerHour || exceededHoursInLastDay == 0) {
           return exceededFeePerDay * exceededDays;
         } else {
-          console.log("e")
           return (
             exceededFeePerHour * exceededHoursInLastDay +
             exceededFeePerDay * (exceededDays - 1)
@@ -1338,14 +1334,18 @@ export function RentACarComparison() {
             <Input
               id="usingTime"
               type="number"
+              inputMode="numeric"
               min="0"
               value={usingTime}
-              onChange={(e) =>
-              {
-                setUsingTime(Math.max(0, parseInt(e.target.value) || 0))
-                setEndDate(new Date(startDate.getTime() + (parseInt(e.target.value) || 0) * 60 * 60 * 1000))
-              }
-              }
+              onChange={(e) => {
+                setUsingTime(Math.max(0, parseInt(e.target.value) || 0));
+                setEndDate(
+                  new Date(
+                    startDate.getTime() +
+                      (parseInt(e.target.value) || 0) * 60 * 60 * 1000
+                  )
+                );
+              }}
             />
           </div>
           <div>
@@ -1353,6 +1353,7 @@ export function RentACarComparison() {
             <Input
               id="mileage"
               type="number"
+              inputMode="numeric"
               min="0"
               value={mileage}
               onChange={(e) =>
@@ -1386,7 +1387,10 @@ export function RentACarComparison() {
                     {result.info.hourPack
                       ? result.info.hourPack.name + " "
                       : "通常料金 "}
-                    {result.info.hourPack ? result.info.hourPack.fee.toLocaleString() : result.fees.timeFee.toLocaleString()}円
+                    {result.info.hourPack
+                      ? result.info.hourPack.fee.toLocaleString()
+                      : result.fees.timeFee.toLocaleString()}
+                    円
                   </TableCell>
                   <TableCell>
                     {result.fees.mileageFee.toLocaleString()}円
