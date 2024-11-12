@@ -1336,6 +1336,7 @@ export function RentACarComparison() {
               type="number"
               inputMode="numeric"
               min="0"
+              max="100000"
               value={usingTime}
               onChange={(e) => {
                 setUsingTime(Math.max(0, parseInt(e.target.value) || 0));
