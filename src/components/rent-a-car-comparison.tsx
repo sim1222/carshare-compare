@@ -670,7 +670,7 @@ const rentalCompanies: RentalCompany[] = [
             feePerKm: 17,
             hourPack: {
               name: fees[1],
-              fee: fees[0]![1]
+              fee: fees[0]![1] ? fees[0]![1] : fees[0]![2] // this is too sketchy
             }
           },
         };
