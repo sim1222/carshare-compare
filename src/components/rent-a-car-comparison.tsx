@@ -20,13 +20,20 @@ import {
 } from "@/components/ui/card";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 import * as JPH from "japanese-holidays";
 
 type RentalCompany = {
   name: string;
   grades: {
-    [index: string]: string,
+    [index: string]: string;
   };
 
   calculateFee: (
@@ -67,19 +74,22 @@ const getHourMin = (
 };
 
 const checkDateSmallerThanHour = (date: Date, hour: number): boolean => {
-  return date.getHours() < hour || (date.getHours() == hour && date.getMinutes() == 0 );
+  return (
+    date.getHours() < hour ||
+    (date.getHours() == hour && date.getMinutes() == 0)
+  );
 };
 
 const checkIsHoliday = (date: Date): boolean => {
-  return JPH.isHolidayAt(date) != undefined || [0, 6].includes(date.getDay())
+  return JPH.isHolidayAt(date) != undefined || [0, 6].includes(date.getDay());
   // return false;
-} 
+};
 
 const rentalCompanies: RentalCompany[] = [
   {
     name: "タイムズカーシェア",
     grades: {
-        "basic": "ベーシック"
+      basic: "ベーシック",
     },
     calculateFee: (startDay, endDay, mileage) => {
       const { hours, minutes } = getHourMin(startDay, endDay);
@@ -204,7 +214,7 @@ const rentalCompanies: RentalCompany[] = [
   {
     name: "TOYOTA SHARE",
     grades: {
-        "C1": "C1/軽"
+      C1: "C1/軽",
     },
     calculateFee: (startDay, endDay, mileage) => {
       const { hours, minutes } = getHourMin(startDay, endDay);
@@ -302,7 +312,7 @@ const rentalCompanies: RentalCompany[] = [
   {
     name: "ENEOSカーシェア",
     grades: {
-        "basic": "ベーシック"
+      basic: "ベーシック",
     },
     calculateFee: (startDay, endDay, mileage) => {
       const { hours, minutes } = getHourMin(startDay, endDay);
@@ -404,7 +414,7 @@ const rentalCompanies: RentalCompany[] = [
   {
     name: "やさしいカーシェア",
     grades: {
-        "compact": "コンパクト"
+      compact: "コンパクト",
     },
     calculateFee: (startDay, endDay, mileage) => {
       const { hours, minutes } = getHourMin(startDay, endDay);
@@ -504,17 +514,16 @@ const rentalCompanies: RentalCompany[] = [
   {
     name: "EveryGo",
     grades: {
-        "entry": "エントリー",
-        "basic": "ベーシック",
-        "middle": "ミドル",
-        "premium": "プレミアム"
+      entry: "エントリー",
+      basic: "ベーシック",
+      middle: "ミドル",
+      premium: "プレミアム",
     },
     calculateFee: (startDay, endDay, mileage, grade) => {
       // 17yen/km
       // 550yen /use
       // night pack 21-07
-      
-      
+
       const TYPE = grade ?? "entry";
       const plans: {
         [index: string]: {
@@ -569,12 +578,12 @@ const rentalCompanies: RentalCompany[] = [
           extend: 95,
         },
       };
-      
+
       const mileageFee = mileage * 17;
       const { hours, minutes } = getHourMin(startDay, endDay);
-      
+
       // max 167hrs = 1week
-      if (hours > 167 ) {
+      if (hours > 167) {
         return {
           fees: {
             totalFee: 0,
@@ -586,58 +595,69 @@ const rentalCompanies: RentalCompany[] = [
             feePerKm: 0,
             hourPack: {
               name: "❌",
-              fee: 0
-            }
+              fee: 0,
+            },
           },
         };
       }
-      
-      const shortFee = checkIsHoliday(startDay) ? undefined : Math.ceil(minutes / 15) * plans[TYPE].weekdays.quarter;
+
+      const shortFee = checkIsHoliday(startDay)
+        ? undefined
+        : Math.ceil(minutes / 15) * plans[TYPE].weekdays.quarter;
       const fourPack = (() => {
-        if (checkIsHoliday(startDay)) return undefined
-        if ( hours < 4) {
-          return [plans[TYPE].weekdays.four, plans[TYPE].weekdays.four, 0]
+        if (checkIsHoliday(startDay)) return undefined;
+        if (hours < 4) {
+          return [plans[TYPE].weekdays.four, plans[TYPE].weekdays.four, 0];
         } else {
-          const short = Math.ceil((minutes - 4 * 60) / 15) * plans[TYPE].weekdays.quarter
-          return [plans[TYPE].weekdays.four + short, plans[TYPE].weekdays.four, short];
+          const short =
+            Math.ceil((minutes - 4 * 60) / 15) * plans[TYPE].weekdays.quarter;
+          return [
+            plans[TYPE].weekdays.four + short,
+            plans[TYPE].weekdays.four,
+            short,
+          ];
         }
       })();
-      const eightPack = (()=>{
-        if ( hours < 8 ) return [plans[TYPE].eight, plans[TYPE].eight, 0]
-        const short = Math.ceil((minutes - 8 * 60) / 15) * plans[TYPE].extend
+      const eightPack = (() => {
+        if (hours < 8) return [plans[TYPE].eight, plans[TYPE].eight, 0];
+        const short = Math.ceil((minutes - 8 * 60) / 15) * plans[TYPE].extend;
         return [plans[TYPE].eight + short, plans[TYPE].eight, short];
-      })()
-      const sixteenPack = (()=>{
-        if ( hours < 16 ) return [plans[TYPE].sixteen, plans[TYPE].sixteen, 0]
-        const short = Math.ceil((minutes - 16 * 60) / 15) * plans[TYPE].extend
+      })();
+      const sixteenPack = (() => {
+        if (hours < 16) return [plans[TYPE].sixteen, plans[TYPE].sixteen, 0];
+        const short = Math.ceil((minutes - 16 * 60) / 15) * plans[TYPE].extend;
         return [plans[TYPE].sixteen + short, plans[TYPE].sixteen, short];
-      })()
-      const nightPack = (()=>{
-        if ( 
+      })();
+      const nightPack = (() => {
+        if (
           hours <= 10 &&
-          (startDay.getHours() >= 21 || checkDateSmallerThanHour(startDay, 7)) &&
+          (startDay.getHours() >= 21 ||
+            checkDateSmallerThanHour(startDay, 7)) &&
           (endDay.getHours() >= 21 || checkDateSmallerThanHour(endDay, 7))
         ) {
-          return plans[TYPE].night
+          return plans[TYPE].night;
         } else {
-          return undefined
+          return undefined;
         }
-      })()
+      })();
       const packs: [number[] | undefined, string][] = [
         [shortFee ? [shortFee, 0, shortFee] : undefined, "15分料金[平日]"],
         [fourPack, "4時間[平日]"],
         [eightPack, "8時間"],
         [sixteenPack, "16時間"],
         [nightPack ? [nightPack, nightPack, 0] : undefined, "ナイトパック"],
-      ]
-      let fees: [number[] | undefined, string] = [[9999999999999999999999999999, 0, ], ""]
+      ];
+      let fees: [number[] | undefined, string] = [
+        [9999999999999999999999999999, 0],
+        "",
+      ];
       // [ [totalFee, packFee, timeFee] , name ]
-      for (const pack of packs ) {
+      for (const pack of packs) {
         if (pack[0] == undefined) {
-          continue
+          continue;
         }
-        if ( fees[0]![0] > (pack[0][0])) {
-          fees = pack
+        if (fees[0]![0] > pack[0][0]) {
+          fees = pack;
         }
       }
 
@@ -654,8 +674,8 @@ const rentalCompanies: RentalCompany[] = [
             feePerKm: 17,
             hourPack: {
               name: `${fees[1]} ${fees[0]![1]}円 延長`, // うしろにfees.hourPack.feeがconcatされる
-              fee: fees[0]![2] // hourPackではないけど
-            }
+              fee: fees[0]![2], // hourPackではないけど
+            },
           },
         };
       } else {
@@ -680,10 +700,10 @@ const rentalCompanies: RentalCompany[] = [
   {
     name: "eシェアモビ",
     grades: {
-        "e1": "サクラ、旧型ノート",
-        "e2": "他普通車",
-        "e3": "旧型セレナ",
-        "e4": "新型セレナ",
+      e1: "サクラ、旧型ノート",
+      e2: "他普通車",
+      e3: "旧型セレナ",
+      e4: "新型セレナ",
     },
     calculateFee: (startDay, endDay, _, grade) => {
       // 月額無料プラン
@@ -758,7 +778,7 @@ const rentalCompanies: RentalCompany[] = [
       const { hours, minutes } = getHourMin(startDay, endDay);
 
       // max 72hrs = 3days
-      if (hours > 72 ) {
+      if (hours > 72) {
         return {
           fees: {
             totalFee: 0,
@@ -770,8 +790,8 @@ const rentalCompanies: RentalCompany[] = [
             feePerKm: 0,
             hourPack: {
               name: "❌",
-              fee: 0
-            }
+              fee: 0,
+            },
           },
         };
       }
@@ -795,14 +815,14 @@ const rentalCompanies: RentalCompany[] = [
       const isDoubleNightOk =
         hours <= 12 &&
         (startDay.getHours() >= 18 || checkDateSmallerThanHour(startDay, 6)) &&
-        (endDay.getHours() >= 18 || checkDateSmallerThanHour(endDay, 6)) && 
+        (endDay.getHours() >= 18 || checkDateSmallerThanHour(endDay, 6)) &&
         !(startDay.getHours() == 6 && endDay.getHours() == 18)
           ? plans[TYPE].night.double
           : undefined;
       const isBusinessNightOk =
         hours <= 17 &&
         (startDay.getHours() >= 17 || checkDateSmallerThanHour(startDay, 10)) &&
-        (endDay.getHours() >= 17 || checkDateSmallerThanHour(endDay, 10)) && 
+        (endDay.getHours() >= 17 || checkDateSmallerThanHour(endDay, 10)) &&
         !(checkDateSmallerThanHour(startDay, 10) && endDay.getHours() >= 17)
           ? plans[TYPE].night.business
           : undefined;
@@ -875,7 +895,7 @@ const rentalCompanies: RentalCompany[] = [
   {
     name: "トヨタレンタカー",
     grades: {
-        "C1": "乗用車(C1)"
+      C1: "乗用車(C1)",
     },
     calculateFee: (startDay, endDay, mileage) => {
       const { hours, minutes } = getHourMin(startDay, endDay);
@@ -953,7 +973,7 @@ const rentalCompanies: RentalCompany[] = [
   {
     name: "ニッポンレンタカー",
     grades: {
-        "K-A": "軽自動車(小型)"
+      "K-A": "軽自動車(小型)",
     },
     calculateFee: (startDay, endDay, mileage) => {
       const { hours, minutes } = getHourMin(startDay, endDay);
@@ -1045,7 +1065,7 @@ const rentalCompanies: RentalCompany[] = [
   {
     name: "ニコニコレンタカー",
     grades: {
-        "K": "軽自動車"
+      K: "軽自動車",
     },
     calculateFee: (startDay, endDay, mileage) => {
       const { hours, minutes } = getHourMin(startDay, endDay);
@@ -1124,7 +1144,7 @@ const rentalCompanies: RentalCompany[] = [
   {
     name: "タイムズレンタカー",
     grades: {
-        "K-0": "軽自動車(小型)"
+      "K-0": "軽自動車(小型)",
     },
     calculateFee: (startDay, endDay, mileage) => {
       const { hours, minutes } = getHourMin(startDay, endDay);
@@ -1176,7 +1196,10 @@ const rentalCompanies: RentalCompany[] = [
         const exceededDays = Math.ceil(exceededHours / 24);
         const exceededHoursInLastDay = exceededHours % 24;
 
-        if (exceededHoursInLastDay > exceededFeePerDay / exceededFeePerHour || exceededHoursInLastDay == 0) {
+        if (
+          exceededHoursInLastDay > exceededFeePerDay / exceededFeePerHour ||
+          exceededHoursInLastDay == 0
+        ) {
           return exceededFeePerDay * exceededDays;
         } else {
           return (
@@ -1216,7 +1239,7 @@ const rentalCompanies: RentalCompany[] = [
   {
     name: "オリックスレンタカー",
     grades: {
-        "KSS": "軽自動車(小型)"
+      KSS: "軽自動車(小型)",
     },
     calculateFee: (startDay, endDay, mileage) => {
       const { hours, minutes } = getHourMin(startDay, endDay);
@@ -1268,7 +1291,10 @@ const rentalCompanies: RentalCompany[] = [
         const exceededDays = Math.ceil(exceededHours / 24);
         const exceededHoursInLastDay = exceededHours % 24;
 
-        if (exceededHoursInLastDay > exceededFeePerDay / exceededFeePerHour || exceededHoursInLastDay == 0) {
+        if (
+          exceededHoursInLastDay > exceededFeePerDay / exceededFeePerHour ||
+          exceededHoursInLastDay == 0
+        ) {
           return exceededFeePerDay * exceededDays;
         } else {
           return (
@@ -1316,32 +1342,32 @@ export function RentACarComparison() {
   const [usingTime, setUsingTime] = useState(0);
   const [mileage, setMileage] = useState(100);
 
-  const grades: {[index:string]: { grades: {[index:string]: string}, selected: string, }} = {}
-  rentalCompanies.forEach(e => {
-    grades[e.name] = 
-        {
-            grades: e.grades,
-            selected: Object.keys(e.grades)[0]
-        }
-  })
-  
+  const grades: {
+    [index: string]: { grades: { [index: string]: string }; selected: string };
+  } = {};
+  rentalCompanies.forEach((e) => {
+    grades[e.name] = {
+      grades: e.grades,
+      selected: Object.keys(e.grades)[0],
+    };
+  });
 
-  const [gradesObj, setGradesObj] = useState(grades)
+  const [gradesObj, setGradesObj] = useState(grades);
 
   useEffect(() => {
-    setUsingTime(getHourMin(startDate, endDate).hours)
-  }, [startDate, endDate])
+    setUsingTime(getHourMin(startDate, endDate).hours);
+  }, [startDate, endDate]);
 
   const updateGrades = (name: string, value: string) => {
-    setGradesObj(prevGradesObj => {
-        const newGradesObj = { ...prevGradesObj };
-        newGradesObj[name] = {
+    setGradesObj((prevGradesObj) => {
+      const newGradesObj = { ...prevGradesObj };
+      newGradesObj[name] = {
         ...newGradesObj[name],
-        selected: value
-        };
-        return newGradesObj;
+        selected: value,
+      };
+      return newGradesObj;
     });
-  }
+  };
 
   return (
     <Card className="w-full max-w-4xl mx-auto">
@@ -1436,21 +1462,36 @@ export function RentACarComparison() {
           </TableHeader>
           <TableBody>
             {rentalCompanies.map((company) => {
-              const grades = gradesObj[company.name]
-              const result = company.calculateFee(startDate, endDate, mileage, grades.selected);
+              const grades = gradesObj[company.name];
+              const result = company.calculateFee(
+                startDate,
+                endDate,
+                mileage,
+                grades.selected
+              );
               return (
                 <TableRow key={company.name}>
                   <TableCell>{company.name}</TableCell>
                   <TableCell>
-                    <select onChange={e => {updateGrades(company.name, e.target.value)}}>
-                        {
-                            Object.entries(grades.grades).map(grade => {
-                                return (
-                                    <option value={grade[0]} key={grade[0]}> {grade[1]} </option>
-                                )
-                            })
-                        }
-                    </select>
+                    <Select
+                      onValueChange={(e) => {
+                        updateGrades(company.name, e);
+                      }}
+                      value={grades.selected}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="プランを選択してください" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Object.entries(grades.grades).map((grade) => {
+                          return (
+                            <SelectItem value={grade[0]} key={grade[0]}>
+                              {grade[1]}
+                            </SelectItem>
+                          );
+                        })}
+                      </SelectContent>
+                    </Select>
                   </TableCell>
                   <TableCell>
                     {result.info.feePerKm.toLocaleString()}円/km
