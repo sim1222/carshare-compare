@@ -23,23 +23,17 @@ import "react-datepicker/dist/react-datepicker.css";
 
 import * as JPH from "japanese-holidays";
 
-// Fictional car rental companies and their pricing models
-
 type RentalCompany = {
   name: string;
-  // baseFee: number;
-  // dailyRate: number;
-  /**
-   * Mileage rate per 1KM
-   */
-  // mileageRate: number;
-  // noNOC: boolean;
-  // noNOCFee: number;
+  grades: {
+    [index: string]: string,
+  };
 
   calculateFee: (
     startDay: Date,
     endDay: Date,
-    mileage: number
+    mileage: number,
+    grade?: string
   ) => {
     fees: {
       totalFee: number;
@@ -84,6 +78,9 @@ const checkIsHoliday = (date: Date): boolean => {
 const rentalCompanies: RentalCompany[] = [
   {
     name: "タイムズカーシェア",
+    grades: {
+        "basic": "ベーシック"
+    },
     calculateFee: (startDay, endDay, mileage) => {
       const { hours, minutes } = getHourMin(startDay, endDay);
 
@@ -206,6 +203,9 @@ const rentalCompanies: RentalCompany[] = [
   },
   {
     name: "TOYOTA SHARE",
+    grades: {
+        "C1": "C1/軽"
+    },
     calculateFee: (startDay, endDay, mileage) => {
       const { hours, minutes } = getHourMin(startDay, endDay);
 
@@ -301,6 +301,9 @@ const rentalCompanies: RentalCompany[] = [
   },
   {
     name: "ENEOSカーシェア",
+    grades: {
+        "basic": "ベーシック"
+    },
     calculateFee: (startDay, endDay, mileage) => {
       const { hours, minutes } = getHourMin(startDay, endDay);
 
@@ -400,6 +403,9 @@ const rentalCompanies: RentalCompany[] = [
   },
   {
     name: "やさしいカーシェア",
+    grades: {
+        "compact": "コンパクト"
+    },
     calculateFee: (startDay, endDay, mileage) => {
       const { hours, minutes } = getHourMin(startDay, endDay);
 
@@ -497,13 +503,19 @@ const rentalCompanies: RentalCompany[] = [
   },
   {
     name: "EveryGo",
-    calculateFee: (startDay, endDay, mileage) => {
+    grades: {
+        "entry": "エントリー",
+        "basic": "ベーシック",
+        "middle": "ミドル",
+        "premium": "プレミアム"
+    },
+    calculateFee: (startDay, endDay, mileage, grade) => {
       // 17yen/km
       // 550yen /use
       // night pack 21-07
       
       
-      const TYPE = "entry";
+      const TYPE = grade ?? "entry";
       const plans: {
         [index: string]: {
           weekdays: {
@@ -667,7 +679,13 @@ const rentalCompanies: RentalCompany[] = [
   },
   {
     name: "eシェアモビ",
-    calculateFee: (startDay, endDay, _) => {
+    grades: {
+        "e1": "サクラ、旧型ノート",
+        "e2": "他普通車",
+        "e3": "旧型セレナ",
+        "e4": "新型セレナ",
+    },
+    calculateFee: (startDay, endDay, _, grade) => {
       // 月額無料プラン
       // 保険330/24h
 
@@ -735,7 +753,7 @@ const rentalCompanies: RentalCompany[] = [
         },
       };
 
-      const TYPE = "e1"; // TODO: switch types
+      const TYPE = grade ?? "e1";
 
       const { hours, minutes } = getHourMin(startDay, endDay);
 
@@ -856,6 +874,9 @@ const rentalCompanies: RentalCompany[] = [
   },
   {
     name: "トヨタレンタカー",
+    grades: {
+        "C1": "乗用車(C1)"
+    },
     calculateFee: (startDay, endDay, mileage) => {
       const { hours, minutes } = getHourMin(startDay, endDay);
 
@@ -931,6 +952,9 @@ const rentalCompanies: RentalCompany[] = [
   },
   {
     name: "ニッポンレンタカー",
+    grades: {
+        "K-A": "軽自動車(小型)"
+    },
     calculateFee: (startDay, endDay, mileage) => {
       const { hours, minutes } = getHourMin(startDay, endDay);
 
@@ -1020,6 +1044,9 @@ const rentalCompanies: RentalCompany[] = [
   },
   {
     name: "ニコニコレンタカー",
+    grades: {
+        "K": "軽自動車"
+    },
     calculateFee: (startDay, endDay, mileage) => {
       const { hours, minutes } = getHourMin(startDay, endDay);
 
@@ -1096,6 +1123,9 @@ const rentalCompanies: RentalCompany[] = [
   },
   {
     name: "タイムズレンタカー",
+    grades: {
+        "K-0": "軽自動車(小型)"
+    },
     calculateFee: (startDay, endDay, mileage) => {
       const { hours, minutes } = getHourMin(startDay, endDay);
 
@@ -1185,6 +1215,9 @@ const rentalCompanies: RentalCompany[] = [
   },
   {
     name: "オリックスレンタカー",
+    grades: {
+        "KSS": "軽自動車(小型)"
+    },
     calculateFee: (startDay, endDay, mileage) => {
       const { hours, minutes } = getHourMin(startDay, endDay);
 
@@ -1283,12 +1316,35 @@ export function RentACarComparison() {
   const [usingTime, setUsingTime] = useState(0);
   const [mileage, setMileage] = useState(100);
 
+  const grades: {[index:string]: { grades: {[index:string]: string}, selected: string, }} = {}
+  rentalCompanies.forEach(e => {
+    grades[e.name] = 
+        {
+            grades: e.grades,
+            selected: Object.keys(e.grades)[0]
+        }
+  })
+  
+
+  const [gradesObj, setGradesObj] = useState(grades)
+
   useEffect(() => {
     setUsingTime(getHourMin(startDate, endDate).hours)
   }, [startDate, endDate])
 
+  const updateGrades = (name: string, value: string) => {
+    setGradesObj(prevGradesObj => {
+        const newGradesObj = { ...prevGradesObj };
+        newGradesObj[name] = {
+        ...newGradesObj[name],
+        selected: value
+        };
+        return newGradesObj;
+    });
+  }
+
   return (
-    <Card className="w-full max-w-3xl mx-auto">
+    <Card className="w-full max-w-4xl mx-auto">
       <CardHeader>
         <CardTitle>Rent-a-Car Fee Comparison</CardTitle>
         <CardDescription>
@@ -1370,6 +1426,7 @@ export function RentACarComparison() {
           <TableHeader>
             <TableRow>
               <TableHead>サービス</TableHead>
+              <TableHead>グレード</TableHead>
               <TableHead>距離料金レート</TableHead>
               <TableHead>時間料金</TableHead>
               <TableHead>距離料金</TableHead>
@@ -1379,10 +1436,22 @@ export function RentACarComparison() {
           </TableHeader>
           <TableBody>
             {rentalCompanies.map((company) => {
-              const result = company.calculateFee(startDate, endDate, mileage);
+              const grades = gradesObj[company.name]
+              const result = company.calculateFee(startDate, endDate, mileage, grades.selected);
               return (
                 <TableRow key={company.name}>
                   <TableCell>{company.name}</TableCell>
+                  <TableCell>
+                    <select onChange={e => {updateGrades(company.name, e.target.value)}}>
+                        {
+                            Object.entries(grades.grades).map(grade => {
+                                return (
+                                    <option value={grade[0]} key={grade[0]}> {grade[1]} </option>
+                                )
+                            })
+                        }
+                    </select>
+                  </TableCell>
                   <TableCell>
                     {result.info.feePerKm.toLocaleString()}円/km
                   </TableCell>
